@@ -21,7 +21,7 @@ EXPORT(int) FsaOpen(FSA_HANDLE* h, const char* file, const char mode)
 {
     ENTER("FsaOpen");
     *h = nullptr;
-    CStream *p = new CStream();
+    p = new CStream();
     p->Open(file,mode);
     *h = p;
     LEAVE();
@@ -32,7 +32,7 @@ EXPORT(int) FsaClose(FSA_HANDLE *h)
     ENTER("FsaClose");
     if (h != nullptr) {
         if (*h != nullptr) {
-            CStream* p = (CStream*)(*h);
+            p = (CStream*)(*h);
             p->Close();
             delete p;
             *h = nullptr;
@@ -45,7 +45,7 @@ EXPORT(int) FsaWriteStream(FSA_HANDLE h, U_INT i, void* buff, U_LONG from, S_INT
 {
     ENTER("FsaWriteStream");
     if (bytes == 0) return 0;
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     p->Write(i,buff,from,bytes);
     p->HeaderFlush();
     LEAVE();
@@ -55,7 +55,7 @@ EXPORT(int) FsaReadStream(FSA_HANDLE h, U_INT i, void* buff, U_LONG from,S_INT b
 {
     ENTER("FsaReadStream");
     if (bytes == 0) return 0;
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     p->Read(i, buff, from,bytes);
     LEAVE();
 }
@@ -63,7 +63,7 @@ EXPORT(int) FsaReadStream(FSA_HANDLE h, U_INT i, void* buff, U_LONG from,S_INT b
 EXPORT(int) FsaGetMaxStreamCount(FSA_HANDLE h, U_INT* cs)
 {
     ENTER("FsaGetMaxStreamCount");
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     *cs = p->HeaderMaxStreams();
     LEAVE();
 }
@@ -71,7 +71,7 @@ EXPORT(int) FsaGetMaxStreamCount(FSA_HANDLE h, U_INT* cs)
 EXPORT(int) FsaExtendMaxStreamCount(FSA_HANDLE h, U_INT cs)
 {
     ENTER("FsaExtendMaxStreamCount");
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     p->HeaderExtendMaxStreams(cs);
     LEAVE();
 }
@@ -79,7 +79,7 @@ EXPORT(int) FsaExtendMaxStreamCount(FSA_HANDLE h, U_INT cs)
 EXPORT(int) FsaGetStreamSize(FSA_HANDLE h, U_INT i, U_LONG* size)
 {
     ENTER("FsaGetStreamSize");
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     *size = p->DirGetStreamSize(i);
     LEAVE();
 }
@@ -87,7 +87,7 @@ EXPORT(int) FsaGetStreamSize(FSA_HANDLE h, U_INT i, U_LONG* size)
 EXPORT(int) FsaGetHeaderTag(FSA_HANDLE h, U_LONG* tag)
 {
     ENTER("FsaGetHeaderTag");
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     *tag = p->HeaderGetTag();
     LEAVE();
 }
@@ -95,7 +95,7 @@ EXPORT(int) FsaGetHeaderTag(FSA_HANDLE h, U_LONG* tag)
 EXPORT(int) FsaSetHeaderTag(FSA_HANDLE h, U_LONG  tag)
 {
     ENTER("FsaSetHeaderTag");
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     p->HeaderSetTag(tag);
     p->HeaderFlush();
     LEAVE();
@@ -103,14 +103,14 @@ EXPORT(int) FsaSetHeaderTag(FSA_HANDLE h, U_LONG  tag)
 EXPORT(int) FsaGetStreamTag(FSA_HANDLE h, U_INT i, U_LONG* tag)
 {
     ENTER("FsaGetStreamTag");
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     *tag = p->DirGetStreamSize(i);
     LEAVE();
 }
 EXPORT(int) FsaSetStreamTag(FSA_HANDLE h, U_INT i, U_LONG  tag)
 {
     ENTER("FsaSetStreamTag");
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     p->DirSetTag(i,tag);
     p->HeaderFlush();
     LEAVE();
@@ -119,7 +119,7 @@ EXPORT(int) FsaSetStreamTag(FSA_HANDLE h, U_INT i, U_LONG  tag)
 EXPORT(int) FsaSetErrHandler(FSA_HANDLE h,ErrHandler f)
 {
     ENTER("FsaSetErrHandler");
-    CStream* p = (CStream*)(h);
+    p = (CStream*)(h);
     p->SetErrHandler(f);
     LEAVE();
 }

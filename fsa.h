@@ -95,6 +95,7 @@ extern "C" {
 
 #define FSA_HANDLE void *
 
+/* Error handler */
 typedef void   (*ErrHandler) (
         FSA_HANDLE  handle,
         const char *function,     /* Function name an error detected */

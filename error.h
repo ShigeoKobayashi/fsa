@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 
-#define ER_THROW(h,e,s) throw new CErrException(h,e,s,__FILE__,__LINE__)
+#define ER_THROW(h,e,s) throw CErrException(h,e,s,__FILE__,__LINE__)
 #define CHECK(f,e,s) if(!(f)) ER_THROW((void *)this,e,s);
 
  /*
@@ -26,6 +26,7 @@ public:
 
 #ifdef _DEBUG
 		printf(" ***** CDbgException(%d,%s,%d) ******\n", code, file_, line_);
+
 		(void)getchar();
 #endif
 		handle        = h;
