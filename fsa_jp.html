@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="jp">
+
+<head>
+<title>FSA: File of Stream Array(C/C++ Library)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta name="keywords" content="DDSL(Digital Dynamic Simulation Library for C/C++,based on Graph Theory)">
+<meta name="description" content="Digital Dynamic Simulation Library for C/C++">
+<style type=text/css>
+body {color: #3f0f0f; background: #efefef; margin-left: 4em; margin-right: 4em;}
+h1 {color: #f0f0f0; background-color: #30A0FF; border-color: #FF00FF; width: 100%;
+    border-style: solid; border-top-width: 0.1em; border-bottom-width: 0.1em; border-right: none;
+    border-left: none;   padding: 0.1em; font-weight: bold; font-size: 160%;text-align: center;
+}
+h2 {color: #00007f; background-color: #e7e7ff; border-color: #949494;
+    width: 100%; border-style: solid;
+    border-left: 0.6em solid #30A0FF;
+    border-right: none; border-top-width: 0.1em;
+    border-bottom-width: 0.1em;  padding: 0.1em;  font-weight: bold;  font-size: 110%;
+}
+h3 {color: #00007f; padding: 0.2em; font-size: 110%;
+    border-style: solid;
+    border-left: none; border-right: none; border-top-width: 0.05em;
+    border-bottom-width: 0.05em; 
+}
+h4, h5 { color: #000000; padding: 0.2em; font-size: 100%;}
+table
+   {background: #00ffff; border-color: #00007f; border-width: 0px; border-style: solid; border-left: 0px; border-right: 0px; border-top:
+    0px;border-bottom: 0px;}
+th {background: #e7e7ff; border-color: #00007f; border-width: 0px; border-style: solid; border-left: 0px; border-right: 0px; border-top:
+    0px;border-bottom: 0px;}
+td {background: #f3f7ff; border-color: #00007f; border-width: 0px; border-style: solid; border-left: 0px; border-right: 0px; border-top:
+    0px;border-bottom: 0px;}
+tr {background: #f3f7ff; border-color: #00007f; border-width: 0px; border-style: solid; border-left: 0px; border-right: 0px; border-top:
+    0px;border-bottom: 0px;}
+dt {margin-top: 0.2em; border-width: 1px;}
+caption { color: #7f0000;font-weight: bold;}
+pre { margin-top: 1px;}
+code { margin-top: 1px; color: #0000ff;}
+kbd { color: #ffffbf;font-weight: bold;}
+blockquote { margin-top: 0px;}
+</style>
+</head>
+
+<body>
+<hr/>
+<h1>FSA: File of Stream Array(C/C++ Library)</h1>
+
+<div align="right">
+このソフトウェアは<a href="https://www.gnu.org/licenses/lgpl-3.0.en.html" target="_new">GNU Lesser General Public License</a>に従って再配布できます。<br/> ソースコード等は<a href="https://github.com/ShigeoKobayashi/fsa/" target="_new">GitHub</a>から全てをダウンロードできます。<br/>
+Copylight (c) 2023 Shigeo Kobayashi. All rights reserved.<br/>
+<a href="./fsa_en.html">[==&gt;English]</a>
+</div>
+<table width="100%"><tr><td><a href="#OVER_VIEW">概要</a></td><td><a href="#PROGRAM">プログラム手順</a></td><td><a href="#API">関数一覧</a></td><td><a href="#SAMPLE">サンプルプログラム（tans.c）</a></td></tr></table>
+<p/>
+<b>FSA(<U>F</U>ile of <U>S</U>tream <U>A</U>rray</b>)
+は独立した複数ストリーム構造を持ったファイルを構築（アクセス）するための C/C++ 関数ライブラリーです。<br/>
+
+
+<a name="OVER_VIEW"/>
+<h2>概要</h2>
+FSAを使用すれば、一つの(FSA)ファイルの中に<b>完全に独立した複数のストリーム</b>（バイトデータ列）を構築することが出来ます。
+個々のストリームはストリーム番号（インデックス）を指定してアクセスされ、それぞれ独立したサイズ（byte単位）を持ちます。
+ストリームのインデックスは配列のインデックスと同様に 0 から始まる整数で指定します。
+
+<a name="PROGRAM"/>
+<h2>プログラム手順</h2>
+<ol>
+<li>まず、fsa.h をソースプログラムに include します。<br/>
+#include "fsa.h"</li>
+<li>次に FSA_HANDLE を定義します（ファイルハンドルと同様です）。<br/>
+FSA_HANDLE h;</li>
+<li>FSAファイルをオープンします。<br/>
+FsaOpen(&amp;h, "test.fsa", 'T');<br/>
+この時、&amp;h とすることに注意（FsaClose(&amp;h)も同様）。<br/>
+FsaOpen()の戻り値が 0 なら、オープン成功。<br/>
+</li>
+<li>ストリームに処理を実行します。<br/>
+FsaWriteStream(h,i,buff,from,bytes) や FsaReadStream (h,i,buff,from,bytes) 等でストリームにI/O処理等を実行します。
+</li>
+<li>FSAファイルをクローズします。<br/>
+FsaClose(&amp;h);</li>
+</ol>
+
+<a name="API"/>
+<h2>関数一覧</h2>
+全ての関数の戻り値は整数です。<br/>
+戻り値：
+<ul>
+<li> 0　　 ... 正常終了</li>
+<li> 0以外 ... エラー（fsa.h 参照）</li>
+</ul>
+※データや情報は全て関数の引数でやり取りします。<br/>
+※すべてのストリームの初期サイズはゼロです。<br/>
+※FSAで提供されるライブラリー関数は全て Fsa という接頭語で開始します。<br/>
+
+<h3>主要関数</h3>
+<table width="100%">
+<col width="40%"><col width="60%">
+<tr><th>関数名</th><th>説明（引数）</th></tr>
+<tr><td>FsaOpen(FSA_HANDLE *h,const char* file, const char mode)</td><td>
+処理対象の FSA ファイルをオープンします。
+<ul>
+<li><b>FSA_HANDLE *h</b><br/>オープンが成功した場合、以後の全ての処理（第一引数）に必要なハンドル値を受け取ります。</li>
+<li><b>const char* file</b><br/>オープンする FSA ファイルのパス。</li>
+<li><b>const char mode</b><br/>オープンモードで以下の一文字を指定します（大文字でも可です）。</li>
+ <ul>
+   <li> <b>'t'</b><br/>新規ファイルを読み書き用に作成します。対象ファイルが存在すれば一旦削除されてから新規に作成されます。</li> 
+   <li> <b>'n'</b><br/>新規ファイルを読み書き用に作成します。対象ファイルが存在すればエラーになります。</li> 
+   <li> <b>'w'</b><br/>既存ファイルを読み書き用にオープンします。対象ファイルが存在しなければすればエラーになります。</li> 
+   <li> <b>'r'</b><br/>既存ファイルを読み込み専用でオープンします。対象ファイルが存在しなければすればエラーになります。</li> 
+ </ul>
+</ul>
+</td></tr>
+<tr><td>FsaWriteStream(FSA_HANDLE h, U_INT i, void* buff,U_LONG from, U_INT bytes)</td><td>ストリームにデータを書き込みます。
+<ul>
+<li><b>FSA_HANDLE *h</b><br/>オープンされているFSAファイルハンドル。</li>
+<li><b>U_INT i</b><br/>書き込み対象のストリーム番号（0-n:注１）。</li>
+<li><b>void* buff</b><br/>書き込みデータ領域のアドレス。</li>
+<li><b>U_LONG from</b><br/>ストリーム(i)上の書き込み開始バイト位置。</li>
+<li><b>U_INT bytes</b><br/>ストリーム(i)上に書き込むバイト数。</li>
+</ul>
+ </td></tr>
+<tr><td>FsaReadStream (FSA_HANDLE h, U_INT i, void* buff,U_LONG from, U_INT bytes)</td><td>
+ストリームからデータを読み込みます。
+<ul>
+<li><b>FSA_HANDLE *h</b><br/>オープンされているFSAファイルハンドル。</li>
+<li><b>U_INT i</b><br/>読み込み対象のストリーム番号（0-n:注１）。</li>
+<li><b>void* buff</b><br/>読み込み用データ領域のアドレス。</li>
+<li><b>U_LONG from</b><br/>ストリーム(i)上の読み込み開始バイト位置。</li>
+<li><b>U_INT bytes</b><br/>ストリーム(i)上の読み込みバイト数。</li>
+</ul>
+
+</td></tr>
+<tr><td>FsaClose(FSA_HANDLE* h)</td><td>FSAファイルをクローズして処理を終了します。エラーが検出されても<a href="#ERROR_HANDLER">エラーハンドラー</a>は呼ばれません。</td></tr>
+</table>
+注１：<blockquote>
+n は FsaGetMaxStreamCount(h,&amp;m) で取得できます（n=m-1）。また、m は FsaExtendMaxStreamCount(h,m) で自由に拡大できます。
+</blockquote>
+
+
+<h3>補助関数</h3>
+<table width="100%">
+<col width="40%"><col width="60%">
+<tr><th>関数名</th><th>説明（引数）</th></tr>
+<tr><td>FsaGetStreamSize(FSA_HANDLE h, U_INT i, U_LONG* size)</td><td>ストリーム i のバイトサイズを size に読み込みます。</td></tr>
+<tr><td>FsaTrimStream(FSA_HANDLE h, U_INT i, U_LONG from)</td><td>ストリーム i のバイトサイズを from にします（from 以降のデータを切り捨てます）。</td></tr>
+<tr><td>FsaGetMaxStreamCount(FSA_HANDLE h, U_INT *cs)</td><td>現在アクセス可能なストリーム数を cs にセットします。</td></tr>
+<tr><td>FsaExtendMaxStreamCount(FSA_HANDLE h, U_INT cs)</td><td>アクセス可能なストリーム数を<b>最低でも</b> cs 個増やします。</td></tr>
+<tr><td>FsaSetFsaTag(FSA_HANDLE h, U_LONG  tag)</td><td>FSAファイルのユーザ固有データ（Tag情報）tag を書き込みます。</td></tr>
+<tr><td>FsaGetFsaTag(FSA_HANDLE h, U_LONG* tag)</td><td>FSAファイルのユーザ固有データ（Tag情報）を tag に読み込みます。 </td></tr>
+<tr><td>FsaSetStreamTag(FSA_HANDLE h, U_INT i, U_LONG  tag)</td><td>ストリーム i のユーザ固有データ（Tag情報）tag を書き込みます。</td></tr>
+<tr><td>FsaGetStreamTag(FSA_HANDLE h, U_INT i, U_LONG* tag)</td><td>ストリーム i のユーザ固有データ（Tag情報）を tag に読み込みます。</td></tr>
+<tr><td>FsaSetErrHandler(FSA_HANDLE h, FSA_ERROR_HANDLER f)</td><td><a href="#ERROR_HANDLER">エラーハンドラー</a> f をセットします。f が NULL（ゼロ）ならエラーハンドラーの登録を削除します。</td></tr>
+<tr><td>FsaGetErrHandler(FSA_HANDLE h, FSA_ERROR_HANDLER *f)</td><td>セットされている<a href="#ERROR_HANDLER">エラーハンドラー</a>を f にセットします。f が NULL（ゼロ）ならエラーハンドラーは登録されていないことを意味します。</td></tr>
+<tr><td>FsaGetOpenMode(FSA_HANDLE h, char *mode)</td><td>FsaOpen()時に指定したオープンモード（大文字）を mode にセットします。 </td></tr>
+</table>
+
+<a name="ERROR_HANDLER"/>
+<h3>エラーハンドラー</h3>
+全ての関数は正常終了の場合はゼロ、エラーの場合はゼロ以外の値を返します。
+毎回、関数の戻り値をチェックするのは面倒なのでエラーハンドラーを登録することをお勧めします。
+内部でエラーが検出された場合、エラーハンドラーが登録されていれば、エラーを通知するために FSA が呼び出してくれます。
+この場合。エラーハンドラーの戻り値がFSA関数の戻り値となります。<p/>
+エラーハンドラーの引数と処理は以下の例（サンプルプログラム tans.c より）を参考にしてください。
+<pre><code>
+int ErrorFunc(
+	/* All arguments are set by FSA */
+	FSA_HANDLE  handle,       /* FSA_HANDLE currently running.   */
+	const char* function,     /* FSA function name the error detected */
+	int         fsa_code,     /* FSA error code(see fsa.h) that FSA function detected.
+                                     (If this is FSA_ERROR_UNDEFINED,then infomations after err_no may be undefined. */
+	int         err_no,       /* copy of C system's errno. Use C standard function strerror(err_no) for detail. */
+	const char* msg,          /* The error message that FSA function can describe. */
+	const char* source_file,  /* The source file the error occured. */
+	int         source_line   /* The source line the error occured. */
+	)
+{
+	char ch;
+	printf(" FSA Error: f=%s code=%d c_er=%d msg=%s file=%s line=%d\n", function, fsa_code, err_no, msg, source_file, source_line);
+	if(err_no!=0) printf("        c error=%d:%s\n",err_no,strerror(err_no));
+	printf("Continue or exit (c|e)?");
+	do {
+		ch = toupper(getchar());
+	} while (ch != 'C' && ch != 'E');
+	if (ch == 'E') {
+		FsaClose(&handle);
+		exit(EXIT_FAILURE);
+	}
+	return fsa_code;
+}
+</code></pre>
+
+<a name="SAMPLE"/>
+<h2>サンプルプログラム(tans.c)</h2>
+具体的なプログラミングについては付属の簡単なサンプルプログラム tans.c を参考にしてください。<br/>
+tans は任意の複数ファイルを一つの FSA ファイルの指定されたインデックス番号位置に格納、そして、
+取り出すことが出来ます。<br/>
+コマンドラインは tans &lt;open mode&gt; &lt;FSA(tans) file&gt; という形で実行します。<br/>
+ここで&lt;open mode&gt;は<a href="#API">FsaOpen()</a>で指定可能なオープンモード文字（1文字）。
+&lt;FSA(tans) file&gt;はオープン対象の FSA ファイル名（パス）です。
+プログラムが起動したら '?' でヘルプメッセージを表示させれば処理内容が分かります。
+<div align="right">
+小林 茂雄（shigeo@tinyforest.jp） 2023-2-10
+</div>
+<hr/>
+</body>
+</html>
