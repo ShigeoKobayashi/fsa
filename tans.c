@@ -148,7 +148,7 @@ void Write(char *pcmd)
 	if (ix < 0) return;
 	FsaGetStreamSize(gh, ix, &size);
 	if (size <= 0) {printf("Error: Index %d is empty\n)", ix); return;}
-	FsaReadStream(gh, ix, gBuffer, 0, 1024);
+	FsaReadStream(gh, ix, gBuffer, 0, (size>1024)?1024: (U_INT)size);
 	if (!(pfile[0])) {
 		if (!Remove(gBuffer)) return;
 		fp = fopen(gBuffer, "wb");
