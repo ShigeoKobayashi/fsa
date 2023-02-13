@@ -1,7 +1,7 @@
 ﻿/*
 ////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                  ///
-///  Copyright(C) 2022 Shigeo Kobayashi (shigeo@tinyforest.jp). All Rights Reserved. ///
+///  Copyright(C) 2023 Shigeo Kobayashi (shigeo@tinyforest.jp). All Rights Reserved. ///
 ///                                                                                  ///
 ////////////////////////////////////////////////////////////////////////////////////////
 */
@@ -16,29 +16,25 @@
 #ifdef _WIN32
  #define WINDOWS
  #ifdef _WIN64
-   /* 64bit Windows */
    #define BIT64
    #define BIT_SIZE 64
  #else
-   /* 32bit Windows */
    #define BIT32
    #define BIT_SIZE 32
  #endif
 #else
  #define LINUX
  #ifdef __x86_64__
-   /* 64bit Linux */
    #define BIT64
    #define BIT_SIZE 64
  #else
-  /* 32bit Linux */
   #define BIT32
   #define BIT_SIZE 32
  #endif
 #endif
 
 #ifndef BIT_SIZE
-#error ***** Undefined Windows or Linux C++ compiler. *****
+#error ***** Undefined C++ compiler. *****
 #endif
 
 #define S_SHORT           short
@@ -55,27 +51,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef WINDOWS /**** WINDOWS ****/
-  /* WINDOWS specific part (Same define's must be defined for other platforms.) */
+#ifdef WINDOWS /**** WINDOWS ***/
   #define EXPORT(t)  __declspec(dllexport) t __stdcall
-  /* Note:
-   __stdcall __cdecl and C#
-   ------------------------
-   WIN32 APIs use __stdcall(which can't be used for vararg functions) with .def file representation.
-   __stdcall without .def file changes function name exported in .lib file.
-   __cdecl (c compiler default) never changes function name exported but consumes more memories than __stdcall.
-   C# [Dllexport] atrribute uses __stdcall in default.
-   To call __cdecl functions from C#, use CallingConvention.Cdecl like "[DllImport("MyDLL.dll", CallingConvention = CallingConvention.Cdecl)]".
-  */
-#endif /**** WINDOWS ****/
+#endif         /*--- WINDOWS ---*/
 
-#ifdef LINUX /******** LINUX ********/
-  /* gcc/g++ specific part ==> compiled with '-fPIC -fvisibility=hidden' option.
-     -fvisibility=hidden option hides everything except explicitly declared as exported API just like
-     as Windows' dll.
-  */
+#ifdef LINUX   /**** LINUX   ****/
   #define EXPORT(t) __attribute__((visibility ("default")))  t
-#endif /**** LINUX ****/
+#endif         /*--- LINUX   ---*/
 
 /* 
  *   Error codes.  
@@ -96,7 +78,7 @@ extern "C" {
 #define FSA_HANDLE void *
 
 /* Error handler */
-typedef void   (*ErrHandler) (
+typedef int  (*FSA_ERROR_HANDLER) (
         FSA_HANDLE  handle,
         const char *function,     /* Function name an error detected */
         int         fsa_code,     /* The error code that FSA function detected(if this is ERROR_FSA_UNDEFINED,then infomations
@@ -106,26 +88,29 @@ typedef void   (*ErrHandler) (
         const char* source_file,  /* The source file the error occured. */
         int         source_line   /* The source line the error occured. */
     );
+
 /*
  *     Open/Close & I/O operations.
  */
 EXPORT(int) FsaOpen(FSA_HANDLE *h,const char* file, const char mode);
-EXPORT(int) FsaWriteStream(FSA_HANDLE h, U_INT i, void* buff,U_LONG from, S_INT bytes);
-EXPORT(int) FsaReadStream (FSA_HANDLE h, U_INT i, void* buff,U_LONG from, S_INT bytes);
+EXPORT(int) FsaWriteStream(FSA_HANDLE h, U_INT i, void* buff,U_LONG from, U_INT bytes);
+EXPORT(int) FsaReadStream (FSA_HANDLE h, U_INT i, void* buff,U_LONG from, U_INT bytes);
+EXPORT(int) FsaTrimStream(FSA_HANDLE h, U_INT i, U_LONG from);
 EXPORT(int) FsaClose(FSA_HANDLE* h);
 
 /*
- *     Utility/Info routines .
+ *     Utility/Information routines .
  */
 EXPORT(int) FsaGetStreamSize(FSA_HANDLE h, U_INT i, U_LONG* size);
 EXPORT(int) FsaGetMaxStreamCount(FSA_HANDLE h, U_INT *cs);
 EXPORT(int) FsaExtendMaxStreamCount(FSA_HANDLE h, U_INT cs);
-
-EXPORT(int) FsaGetHeaderTag(FSA_HANDLE h, U_LONG* tag);
-EXPORT(int) FsaSetHeaderTag(FSA_HANDLE h, U_LONG  tag);
+EXPORT(int) FsaGetFsaTag(FSA_HANDLE h, U_LONG* tag);
+EXPORT(int) FsaSetFsaTag(FSA_HANDLE h, U_LONG  tag);
 EXPORT(int) FsaGetStreamTag(FSA_HANDLE h, U_INT i, U_LONG* tag);
 EXPORT(int) FsaSetStreamTag(FSA_HANDLE h, U_INT i, U_LONG  tag);
-EXPORT(int) FsaSetErrHandler(FSA_HANDLE h, ErrHandler f);
+EXPORT(int) FsaSetErrHandler(FSA_HANDLE h, FSA_ERROR_HANDLER f);
+EXPORT(int) FsaGetErrHandler(FSA_HANDLE h, FSA_ERROR_HANDLER *pf);
+EXPORT(int) FsaGetOpenMode(FSA_HANDLE h, unsigned char *pmode);
 
 
 #ifdef __cplusplus

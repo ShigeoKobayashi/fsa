@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
+<head>
+<title>FSA: File of Stream Array(C/C++ Library)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta name="keywords" content="DDSL(Digital Dynamic Simulation Library for C/C++,based on Graph Theory)">
+<meta name="description" content="Digital Dynamic Simulation Library for C/C++">
+<style type=text/css>
+body {color: #3f0f0f; background: #efefef; margin-left: 4em; margin-right: 4em;}
+h1 {color: #f0f0f0; background-color: #30A0FF; border-color: #FF00FF; width: 100%;
+    border-style: solid; border-top-width: 0.1em; border-bottom-width: 0.1em; border-right: none;
+    border-left: none;   padding: 0.1em; font-weight: bold; font-size: 160%;text-align: center;
+}
+h2 {color: #00007f; background-color: #e7e7ff; border-color: #949494;
+    width: 100%; border-style: solid;
+    border-left: 0.6em solid #30A0FF;
+    border-right: none; border-top-width: 0.1em;
+    border-bottom-width: 0.1em;  padding: 0.1em;  font-weight: bold;  font-size: 110%;
+}
+h3 {color: #00007f; padding: 0.2em; font-size: 110%;
+    border-style: solid;
+    border-left: none; border-right: none; border-top-width: 0.05em;
+    border-bottom-width: 0.05em; 
+}
+h4, h5 { color: #000000; padding: 0.2em; font-size: 100%;}
+table
+   {background: #00ffff; border-color: #00007f; border-width: 0px; border-style: solid; border-left: 0px; border-right: 0px; border-top:
+    0px;border-bottom: 0px;}
+th {background: #e7e7ff; border-color: #00007f; border-width: 0px; border-style: solid; border-left: 0px; border-right: 0px; border-top:
+    0px;border-bottom: 0px;}
+td {background: #f3f7ff; border-color: #00007f; border-width: 0px; border-style: solid; border-left: 0px; border-right: 0px; border-top:
+    0px;border-bottom: 0px;}
+tr {background: #f3f7ff; border-color: #00007f; border-width: 0px; border-style: solid; border-left: 0px; border-right: 0px; border-top:
+    0px;border-bottom: 0px;}
+dt {margin-top: 0.2em; border-width: 1px;}
+caption { color: #7f0000;font-weight: bold;}
+pre { margin-top: 1px;}
+code { margin-top: 1px; color: #0000ff;}
+kbd { color: #ffffbf;font-weight: bold;}
+blockquote { margin-top: 0px;}
+</style>
+</head>
+
+<body>
+<hr/>
+<h1>FSA: File of Stream Array(C/C++ Library)</h1>
+
+<div align="right">
+This software can be redistributed under <a href="https://www.gnu.org/licenses/lgpl-3.0.en.html" target="_new">GNU Lesser General Public License</a>.<br/> And <a href="https://github.com/ShigeoKobayashi/fsa/" target="_new">every source codes can be obtained through GitHub</a><br/>
+Copylight (c) 2023 Shigeo Kobayashi. All rights reserved.<br/>
+<a href="./fsa_jp.html">[==&gt;Japanese]</a>
+</div>
+<table width="100%"><tr><td><a href="#OVER_VIEW">Overview</a></td><td><a href="#API">API references</a></td><td><a href="#SAMPLE">Sample program(tans.c)</a></td></tr></table>
+<p/>
+<b>FSA(<U>F</U>ile of <U>S</U>tream <U>A</U>rray</b>)
+is a C/C++ API library for accessing FSA file,which is constructed by multiple stream structure.<br/>
+
+
+<a name="OVER_VIEW"/>
+<h2>Overview</h2>
+Using FSA,you can create and access multiple streams in a file(FSA file). Each stream is mutually and completely independent. Just like an array index,stream index starting with 0 must be specified to access specific stream.
+Any stream,therefore,has its own stream size(length).<p/>
+<table width="100%">
+<col width="30%">
+<col width="35%">
+<col width="35%">
+<tr><th>I/O steps by standard C library</th><th>I/O steps by FSA</th><th>Description</th></tr>
+<tr><td>
+#include &lt;stdio.h&gt;<br/>
+#include &lt;fcntl.h&gt;<br/>
+#include &lt;unistd.h&gt;<br/>
+<br/>
+int fd;<br/>
+fd=open(pathname,openmode);<br/>
+read(fd,buf,count);<br/>
+write(fd,buf,count);<br/>
+close(fd);<br/>
+</td><td>
+/* fsa.h must be included before using FSA API */<br/>
+#include "fsa.h" <br/>
+<br/>
+FSA_HANDLE h;<br/>
+FsaOpen(&amp;h,pathname, openmode);<br/>
+FsaReadStream(h,<b><u>i</u></b>,buf,<b>from</b>,count);<br/>
+FsaWriteStream(h,<b><u>i</u></b>,buf,<b>from</b>,count);<br/>
+FsaClose(&amp;h);<br/>
+</td><td>
+It is the same as in standard C/C++ API and FSA API that the target file to be accessed must be opened at first and closed when finished.<br/>
+In standard C/C++, write() corresponds to FSA FsaWriteStream(),and read() to FsaReadStream().<br/>
+In FSA,you need to specify starting byte position '<b>from</b>' for I/O processing,because seek() is not supported.<br/>
+<br/>
+Note the important difference that,in FsaReadStream() and FsaWriteStream(),one more argument <b>i which is the index of the target stream</b> is specified.<br/> In FSA,I/O with different index i is completely independent and different. Also note that any stream identified by index i has its own stream size.
+</td></tr>
+<table>
+
+<a name="API"/>
+<h2>API references</h2>
+Every API functions in FSA return integer value.<br/>
+<ul>
+<li> 0     ... success</li>
+<li> other ... any error detected(see fsa.h).</li>
+</ul>
+Note:
+<blockquote>
+All data/informations are passed or received through arguments except function status.<br/>
+Initial size of every streams are zero.<br/>
+All function names exported by FSA begin "Fsa".<br/>
+Before using any function listed bellow,fsa.h must be included in your codes(#include "fsa.h").
+</blockquote>
+
+<h3>Major functions</h3>
+<table width="100%">
+<col width="40%"><col width="60%">
+<tr><th>Function</th><th>Description</th></tr>
+<tr><td>FsaOpen(FSA_HANDLE *h,const char* file, const char mode)</td><td>
+opens the target file.
+<ul>
+<li><b>FSA_HANDLE *h</b><br/>h receives FSA_HANDLE value when the file is successfully opened.
+This h will be specified at the first argument for any FSA functions.</li>
+<li><b>const char* file</b><br/>target file path to be opened.</li>
+<li><b>const char mode</b><br/>1 character(capital character is accepted) open mode listed bellow.</li>
+ <ul>
+   <li> <b>'t'</b><br/>creates new file for read &anp; write mode. If the file exists,it is truncated.</li> 
+   <li> <b>'n'</b><br/>creates new file for read &anp; write mode. If the file exists, open failes.</li> 
+   <li> <b>'w'</b><br/>opens exiting file for read &anp; write mode. If the file does not exist,open failes.</li> 
+   <li> <b>'r'</b><br/>opens exiting file for read only mode. If the file does not exist,open failes.</li>
+ </ul>
+</ul>
+</td></tr>
+<tr><td>FsaWriteStream(FSA_HANDLE h, U_INT i, void* buff,U_LONG from, U_INT bytes)</td><td>writes data to specified stream.
+<ul>
+<li><b>FSA_HANDLE h</b><br/>FSA file handle opened.</li>
+<li><b>U_INT i</b><br/>stream index number data written(0-n: see Note).</li>
+<li><b>void* buff</b><br/>buffer address of the data written to the stream i.</li>
+<li><b>U_LONG from</b><br/>byte location of in the stream i from where the data is written.<br/>
+(0 &lt;= from  &lt;= current size of the stream i)
+</li>
+<li><b>U_INT bytes</b><br/>total number of bytes written to the stream i.</li>
+</ul>
+ </td></tr>
+<tr><td>FsaReadStream (FSA_HANDLE h, U_INT i, void* buff,U_LONG from, U_INT bytes)</td><td>
+reads data from specified stream.
+<ul>
+<li><b>FSA_HANDLE h</b><br/>FSA file handle opened.</li>
+<li><b>U_INT i</b><br/>stream index number data read(0-n: see Note).</li>
+<li><b>void* buff</b><br/>buffer address of the data read from the stream i.</li>
+<li><b>U_LONG from</b><br/>byte location of in the stream i from where the data is read.<br/>
+(from + bytes &lt;= current size of the stream i)
+</li>
+<li><b>U_INT bytes</b><br/>total number of bytes read from the stream i.</li>
+</ul>
+
+</td></tr>
+<tr><td>FsaClose(FSA_HANDLE* h)</td><td>closes FSA file proccessed. Even if any error is detected,the <a href="#ERROR_HANDLER">error handler</a> is not called if it is set.</td></tr>
+</table><br/>
+Note:<blockquote>n can be obtained by calling FsaGetMaxStreamCount(h,&amp;m) where n=m-1. And,m can be extended to any number by FsaExtendMaxStreamCount(h,M). (Total count of streams will be increased at least M).
+</blockquote>
+
+
+<h3>補助関数</h3>
+<table width="100%">
+<col width="40%"><col width="60%">
+<tr><th>関数名</th><th>説明（引数）</th></tr>
+<tr><td>FsaGetStreamSize(FSA_HANDLE h, U_INT i, U_LONG* size)</td><td>sets the current byte size of the stream i to size.</td></tr>
+<tr><td>FsaTrimStream(FSA_HANDLE h, U_INT i, U_LONG from)</td><td>sets the current byte size of the stream i to 'from' (every data after from will be deleted).</td></tr>
+<tr><td>FsaGetMaxStreamCount(FSA_HANDLE h, U_INT *cs)</td><td>sets the maximum number of the streams currently accessible to cs.</td></tr>
+<tr><td>FsaExtendMaxStreamCount(FSA_HANDLE h, U_INT cs)</td><td>extens(increases) the maximum number of the streams <b>at least</b> cs.</td></tr>
+<tr><td>FsaSetFsaTag(FSA_HANDLE h, U_LONG  tag)</td><td>sets user specific data tag,which is kept in the header,to FSA file(h).</td></tr>
+<tr><td>FsaGetFsaTag(FSA_HANDLE h, U_LONG* tag)</td><td>gets user specific data to tag from FSA file.</td></tr>
+<tr><td>FsaSetStreamTag(FSA_HANDLE h, U_INT i, U_LONG  tag)</td><td>set user specific data tag,which is kept in each stream directory,to stream i.</td></tr>
+<tr><td>FsaGetStreamTag(FSA_HANDLE h, U_INT i, U_LONG* tag)</td><td>gets user specific data tag from stream i.</td></tr>
+<tr><td>FsaSetErrHandler(FSA_HANDLE h, FSA_ERROR_HANDLER f)</td><td>sets(registers) the address of the <a href="#ERROR_HANDLER">error handler</a> f. If f is NULL(0),then previously registerred adress will be deleted.</td></tr>
+<tr><td>FsaGetErrHandler(FSA_HANDLE h, FSA_ERROR_HANDLER *f)</td><td>gets <a href="#ERROR_HANDLER">error handler</a>address to f. If obtained f is NULL(0),then no error handler has not been registerred yet.</td></tr>
+<tr><td>FsaGetOpenMode(FSA_HANDLE h, char *mode)</td><td>gets open mode (capitalized)character to mode which was specified FsaOpen().</td></tr>
+</table>
+
+<a name="ERROR_HANDLER"/>
+<h3>Error handler</h3>
+Every FSA functions return function value 0 for successfull results,nonzero value otherwise.
+It sometimes is not easy to check every function's return value.
+You can register the error handler instead. If the error handler is registerred,then FSA function calls it every time when any error is detected. FSA function returns the value the error handler returned to the user.<p/>
+See how the error handler is used in the sample program tans.c.<br/>
+The error handler is defined like the list bellow.
+<pre><code>
+int ErrorFunc(
+	/* All arguments are set by FSA */
+	FSA_HANDLE  handle,       /* FSA_HANDLE currently running.   */
+	const char* function,     /* FSA function name the error detected */
+	int         fsa_code,     /* FSA error code(see fsa.h) that FSA function detected.
+                                     (If this is FSA_ERROR_UNDEFINED,then infomations after err_no may be undefined. */
+	int         err_no,       /* copy of C system's errno. Use C standard function strerror(err_no) for detail. */
+	const char* msg,          /* The error message that FSA function can describe. */
+	const char* source_file,  /* The source file the error occured. */
+	int         source_line   /* The source line the error occured. */
+	)
+{
+	char ch;
+	printf(" FSA Error: f=%s code=%d c_er=%d msg=%s file=%s line=%d\n", function, fsa_code, err_no, msg, source_file, source_line);
+	if(err_no!=0) printf("        c error=%d:%s\n",err_no,strerror(err_no));
+	printf("Continue or exit (c|e)?");
+	do {
+		ch = toupper(getchar());
+	} while (ch != 'C' && ch != 'E');
+	if (ch == 'E') {
+		FsaClose(&handle);
+		exit(EXIT_FAILURE);
+	}
+	return fsa_code;
+}
+</code></pre>
+
+<a name="SAMPLE"/>
+<h2>Sanple program (tans.c)</h2>
+For actual programming,see the sample program tans.c(The FSA file, tans.c opens is called TANS file).<br/>
+Using tans.c,you can store any file to TANS file(to any stream),and withdraw any file(stream) from TANS file.<br/>
+To invoke,command line will be: <b>tans &lt;open mode&gt; &lt;FSA(TANS) file&gt;</b><br/>
+where <b>&lt;open mode&gt;</B> is the same open mode character specified to <a href="#API">FsaOpen()</a>.<br/>
+<b>&lt;FSA(TANS) file&gt;</b> is the target FSA file path.<br/>
+You can specify <b>'?'</b> to see help messages.
+<hr/>
+<div align="right">
+Shigeo Kobayashi(shigeo@tinyforest.jp) 2023-2-10
+</div>
+<hr/>
+</body>
+</html>

@@ -43,13 +43,13 @@ public:
 	U_LONG   FIoSize();
 	void     FIoFlush();
 	int      FIoIsReadOnly()     {return OpenMode=='R';}
-	int      FIoIsNewFile()      {return OpenMode == 'N'; };
+	int      FIoIsNewFile()      {return OpenMode == 'N' || OpenMode == 'T'; };
 	int      FIoIsOpened()       {return m_hFile!=NULL;};
-	char     FIoOpenedMode()     {return OpenMode; };
+	unsigned char  FIoOpenedMode()     {return OpenMode; };
 
 private:
-	char     OpenMode;      // Open mode char.
-	FILE   *m_hFile;          // file handle
+	unsigned char  OpenMode;      // Open mode char.
+	FILE          *m_hFile;          // file handle
 //	char    m_szFile[MAX_PATH_SIZE];
 };
 

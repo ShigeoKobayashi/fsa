@@ -29,7 +29,7 @@ void CStream::Open(const char* file, const char mode)
 void CStream::Write(U_INT ix, void* buff, U_LONG from,U_INT bytes)
 {
 	CHECK(from <= DirGetStreamSize(ix), ERROR_FSA_WRITE, "Write starts from out of range!");
-	CHECK((S_INT)bytes > 0, ERROR_FSA_WRITE, "Negative number of bytes written is illegal.");
+	if (bytes == 0) return;
 
 	U_INT    ixb      = (U_INT)BIoCompBlock(from);
 	U_INT    ixs      = (U_INT)BIoCompOffset(from);
@@ -41,19 +41,19 @@ void CStream::Write(U_INT ix, void* buff, U_LONG from,U_INT bytes)
 		U_INT    c = cb;
 		if (ixs + c > BIoBlockSize())  c = BIoBlockSize() - ixs;
 		BIoWriteToCache(data_block, pb, ixs, (U_INT)c);
-		DirAddStreamSize(ix, c);
 		ixs    = 0;
 		pb    += c;
 		cb    -= c;
 	}
+	if(from+bytes>DirGetStreamSize(ix)) DirAddStreamSize(ix, from + bytes-DirGetStreamSize(ix));
 	BIoFlushCache();
 	HeaderFlush();
 }
 
 void CStream::Read(U_INT ix,void *buff,U_LONG from, U_INT bc)
 {
-	CHECK((S_INT)bc > 0, ERROR_FSA_READ, "Negative number of bytes read is illegal.");
 	CHECK((from + bc) <= DirGetStreamSize(ix), ERROR_FSA_READ, "Read starts from out of range!");
+	if (bc == 0) return;
 
 	U_INT    ixb      = (U_INT)BIoCompBlock(from);
 	U_INT    ixs      = (U_INT)BIoCompOffset(from);
@@ -69,6 +69,29 @@ void CStream::Read(U_INT ix,void *buff,U_LONG from, U_INT bc)
 		pb += c;
 		bc -= c;
 	}
+}
+
+void CStream::Trim(U_INT ix, U_LONG from)
+{
+	CHECK(from < DirGetStreamSize(ix), ERROR_FSA_STREAM, "Trim starts from out of range!");
+	if (from >= DirGetStreamSize(ix)) return;
+	/*
+	U_INT ix_sat = DirGetSatIndex(ix);
+	U_INT    ixb = (U_INT)BIoCompBlock(from);
+	U_INT    ixs = (U_INT)BIoCompOffset(from);
+	U_INT    data_block;
+
+	if (ixs == 0) {
+		data_block = SatGetDatIndex(ix_sat, ixb);
+		HeaderDelBlock(data_block);
+		SatSetDatIndex(ix_sat, ixb, 0);
+	}
+	while ((++ixb)<DirGetSatBlockCount(ix) && (data_block = SatGetDatIndex(ix_sat, ixb))!=0) {
+		HeaderDelBlock(data_block);
+		SatSetDatIndex(ix_sat, ixb, 0);
+	}
+	*/
+	DirSetStreamSize(ix, from);
 }
 
 void CStream::Close()

@@ -65,9 +65,11 @@ public:
 		return DirGetElement(ix)->tag;
 	};
 
-	void DirSetTag(U_INT ix, U_LONG tag) {
+	void DirSetTag(U_INT ix, U_LONG tag)
+	{
 		DirGetElement(ix)->tag = tag;
 		DirWriteElement(ix);
+		HeaderFlush();
 	};
 
 	U_INT DirGetSatIndex(U_INT ix) {
@@ -83,9 +85,13 @@ public:
 		return DirGetElement(ix)->stream_size;
 	};
 
+	void DirSetStreamSize(U_INT ix,U_LONG s) {
+		DirGetElement(ix)->stream_size = s;
+		DirWriteElement(ix);
+	};
+
 	void DirAddStreamSize(U_INT ix, U_LONG s) {
-		directory_element* p = DirGetElement(ix);
-		p->stream_size += s;
+		DirGetElement(ix)->stream_size += s;
 		DirWriteElement(ix);
 	};
 

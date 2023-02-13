@@ -11,10 +11,24 @@
 #define ___HEADER_H___
 
 #include "fileio.h"
+//
+// The block size will be DEF_STREAMS_IN_BLOCK*sizeof(directory_element)
+//   Currently DEF_STREAMS_IN_BLOCK = 50,then block size = 1200 bytes(nearly 1Kb)
+// This can be changed without affecting FSA file compatibility 
+//   because this value is saved in FSA files.
+#define DEF_STREAMS_IN_BLOCK 50
 
-#define DEF_STREAMS_IN_BLOCK 4
-
+//
+// FSA file ID kept in the top of the header (Version: FSA 1.00).
 static const char gfile_id[8] = {'F','S','A',' ','1','0','0','\0'};
+
+//
+// All user's data are stored to the block called 'data block'.
+// To get to data block,searching starts from 'header block','stream directory block',SAT(Stream Allocation Table),and the data block finally.
+//
+// Route to get to user's data (stream)  i=stream indes, p=I/O position. 
+//   Header.directory_index -> Stream Directory[i].sat_index -> i-th.SAT[p].data_block_index -> user's data block[p].
+//
 
 //
 // header structure
@@ -35,14 +49,17 @@ struct HEADER_VARIABLE {
 	U_INT  deleted_chain;    // deleted block chain
 } ;
 
+//
+// Header is always located at the block 0.
 struct Header {
 	HEADER_CONSTANT unchangeable;
 	HEADER_VARIABLE changeable;
 };
 
 //
-// element of stream directory 
-struct directory_element {
+// The directory(for all streams) of which blocks are always contiguous.
+// The directory is an array of following directory_element.
+struct directory_element { // Informations for one stream.
 	U_LONG tag;             // For user
 	U_LONG stream_size;     // the size of the stream(in bytes).
 	U_INT  sat_block_count; // block count of the SAT (stream_size<=sat_block_count*block_size)
@@ -50,9 +67,9 @@ struct directory_element {
 };
 
 //
-// element of SAT (stream allocation table)
+// element of SAT (stream allocation table,contiguous)
 struct sat_element {
-	U_INT data_block_index;        // the position of a data block.
+	U_INT data_block_index;        // the position of a block for user's data.
 };
 
 #define HeaderAddTotalBlocks(bc)  {m_header.changeable.total_blocks += bc;	m_fHeaderModified = true;}
@@ -62,6 +79,8 @@ struct sat_element {
 #define HeaderGetDirIndex()       (m_header.changeable.directory_index)
 #define HeaderSetTotalBlocks(bc)  {ASSERT(m_header.changeable.total_blocks < bc);m_header.changeable.total_blocks = bc;	m_fHeaderModified = true;}
 #define HeaderStreamsInBlock()    (m_header.unchangeable.streams_in_block)
+#define HeaderGetTotalBlocks()    (m_header.changeable.total_blocks)
+#define HeaderBlockSize()         (m_header.unchangeable.block_size)
 
 
 //
@@ -102,22 +121,15 @@ public:
 		return m_header.changeable.max_streams;
 	};
 
-	U_INT HeaderBlockSize()
-	{
-		return m_header.unchangeable.block_size;
-	};
-
-	U_INT HeaderGetTotalBlocks() { 
-		return m_header.changeable.total_blocks; 
-	};  // total number of blocks in the file
-
 	U_LONG  HeaderGetTag() {
 		return m_header.changeable.tag;
 	}
 
-	void   HeaderSetTag(U_LONG tag) {
+	void   HeaderSetTag(U_LONG tag)
+	{
 		m_header.changeable.tag = tag;
 		m_fHeaderModified = true;
+		HeaderFlush();
 	};
 
 	U_INT HeaderAddBlocks(U_INT cb)

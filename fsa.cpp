@@ -3,19 +3,18 @@
 
 #define ENTER(s)   int e=0;CStream *p=nullptr;const char *function=s;errno=0;try {// TRACE(("Enter:%s",s));
 #define LEAVE()    }  catch (CErrException er) {\
-    if(p!=nullptr && p->GetErrHandler()!=nullptr) {\
-        (*(p->GetErrHandler()))((FSA_HANDLE)p,function,er.fsa_code,er.err_no,er.msg,er.source_file,er.source_line);\
-    };\
     e = er.fsa_code;\
+    if(p!=nullptr && p->GetErrHandler()!=nullptr) {\
+        e = (*(p->GetErrHandler()))((FSA_HANDLE)p,function,er.fsa_code,er.err_no,er.msg,er.source_file,er.source_line);\
+    }\
   } catch(...) {\
    TRACE(("Undefined error(...) errno=%d!",errno));\
     e = ERROR_FSA_UNDEFINED;\
     if(p!=nullptr && p->GetErrHandler()!=nullptr) {\
-        (*(p->GetErrHandler()))((FSA_HANDLE)p,function,e,errno,"Undefined error(not catched by FSA)","",0);\
+        e = (*(p->GetErrHandler()))((FSA_HANDLE)p,function,e,errno,"Undefined error(not catched by FSA)","",0);\
     };\
   };\
   return e;
-
 
 EXPORT(int) FsaOpen(FSA_HANDLE* h, const char* file, const char mode)
 {
@@ -33,6 +32,7 @@ EXPORT(int) FsaClose(FSA_HANDLE *h)
     if (h != nullptr) {
         if (*h != nullptr) {
             p = (CStream*)(*h);
+            p->SetErrHandler(nullptr);
             p->Close();
             delete p;
             *h = nullptr;
@@ -41,22 +41,29 @@ EXPORT(int) FsaClose(FSA_HANDLE *h)
     LEAVE();
 }
 
-EXPORT(int) FsaWriteStream(FSA_HANDLE h, U_INT i, void* buff, U_LONG from, S_INT bytes)
+EXPORT(int) FsaWriteStream(FSA_HANDLE h, U_INT i, void* buff, U_LONG from, U_INT bytes)
 {
     ENTER("FsaWriteStream");
     if (bytes == 0) return 0;
     p = (CStream*)(h);
     p->Write(i,buff,from,bytes);
-    p->HeaderFlush();
     LEAVE();
 }
 
-EXPORT(int) FsaReadStream(FSA_HANDLE h, U_INT i, void* buff, U_LONG from,S_INT bytes)
+EXPORT(int) FsaReadStream(FSA_HANDLE h, U_INT i, void* buff, U_LONG from,U_INT bytes)
 {
     ENTER("FsaReadStream");
     if (bytes == 0) return 0;
     p = (CStream*)(h);
     p->Read(i, buff, from,bytes);
+    LEAVE();
+}
+
+EXPORT(int) FsaTrimStream(FSA_HANDLE h,U_INT i, U_LONG from)
+{
+    ENTER("FsaTrimStream");
+    p = (CStream*)(h);
+    p->Trim(i,from);
     LEAVE();
 }
 
@@ -84,20 +91,19 @@ EXPORT(int) FsaGetStreamSize(FSA_HANDLE h, U_INT i, U_LONG* size)
     LEAVE();
 }
 
-EXPORT(int) FsaGetHeaderTag(FSA_HANDLE h, U_LONG* tag)
+EXPORT(int) FsaGetFsaTag(FSA_HANDLE h, U_LONG* tag)
 {
-    ENTER("FsaGetHeaderTag");
+    ENTER("FsaGetFsaTag");
     p = (CStream*)(h);
     *tag = p->HeaderGetTag();
     LEAVE();
 }
 
-EXPORT(int) FsaSetHeaderTag(FSA_HANDLE h, U_LONG  tag)
+EXPORT(int) FsaSetFsaTag(FSA_HANDLE h, U_LONG  tag)
 {
-    ENTER("FsaSetHeaderTag");
+    ENTER("FsaSetFsaTag");
     p = (CStream*)(h);
     p->HeaderSetTag(tag);
-    p->HeaderFlush();
     LEAVE();
 }
 EXPORT(int) FsaGetStreamTag(FSA_HANDLE h, U_INT i, U_LONG* tag)
@@ -112,14 +118,29 @@ EXPORT(int) FsaSetStreamTag(FSA_HANDLE h, U_INT i, U_LONG  tag)
     ENTER("FsaSetStreamTag");
     p = (CStream*)(h);
     p->DirSetTag(i,tag);
-    p->HeaderFlush();
     LEAVE();
 }
 
-EXPORT(int) FsaSetErrHandler(FSA_HANDLE h,ErrHandler f)
+EXPORT(int) FsaSetErrHandler(FSA_HANDLE h, FSA_ERROR_HANDLER f)
 {
     ENTER("FsaSetErrHandler");
     p = (CStream*)(h);
     p->SetErrHandler(f);
+    LEAVE();
+}
+
+EXPORT(int) FsaGetErrHandler(FSA_HANDLE h, FSA_ERROR_HANDLER* pf)
+{
+    ENTER("FsaGetErrHandler");
+    p = (CStream*)(h);
+    *pf = p->GetErrHandler();
+    LEAVE();
+}
+
+EXPORT(int) FsaGetOpenMode(FSA_HANDLE h, unsigned char* pmode)
+{
+    ENTER("FsaGetOpenMode");
+    p = (CStream*)(h);
+    *pmode = p->FIoOpenedMode();
     LEAVE();
 }

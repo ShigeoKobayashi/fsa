@@ -51,7 +51,7 @@ blockquote { margin-top: 0px;}
 Copylight (c) 2023 Shigeo Kobayashi. All rights reserved.<br/>
 <a href="./fsa_en.html">[==&gt;English]</a>
 </div>
-<table width="100%"><tr><td><a href="#OVER_VIEW">概要</a></td><td><a href="#PROGRAM">プログラム手順</a></td><td><a href="#API">関数一覧</a></td><td><a href="#SAMPLE">サンプルプログラム（tans.c）</a></td></tr></table>
+<table width="100%"><tr><td><a href="#OVER_VIEW">概要</a></td><td><a href="#API">関数一覧</a></td><td><a href="#SAMPLE">サンプルプログラム（tans.c）</a></td></tr></table>
 <p/>
 <b>FSA(<U>F</U>ile of <U>S</U>tream <U>A</U>rray</b>)
 は独立した複数ストリーム構造を持ったファイルを構築（アクセス）するための C/C++ 関数ライブラリーです。<br/>
@@ -60,27 +60,44 @@ Copylight (c) 2023 Shigeo Kobayashi. All rights reserved.<br/>
 <a name="OVER_VIEW"/>
 <h2>概要</h2>
 FSAを使用すれば、一つの(FSA)ファイルの中に<b>完全に独立した複数のストリーム</b>（バイトデータ列）を構築することが出来ます。
-個々のストリームはストリーム番号（インデックス）を指定してアクセスされ、それぞれ独立したサイズ（byte単位）を持ちます。
-ストリームのインデックスは配列のインデックスと同様に 0 から始まる整数で指定します。
+個々のストリームはストリーム番号（インデックス）を指定してアクセスされ、それぞれ独立したサイズ（byte単位）を持ちます。ストリームのインデックスは配列のインデックスと同様に 0 から始まる整数で指定します。つまり、FSAファイルは内部に複数のストリームを持ち、I/O処理は個々のストリームに対して独立に実行されます。
+<p/>
 
-<a name="PROGRAM"/>
-<h2>プログラム手順</h2>
-<ol>
-<li>まず、fsa.h をソースプログラムに include します。<br/>
-#include "fsa.h"</li>
-<li>次に FSA_HANDLE を定義します（ファイルハンドルと同様です）。<br/>
-FSA_HANDLE h;</li>
-<li>FSAファイルをオープンします。<br/>
-FsaOpen(&amp;h, "test.fsa", 'T');<br/>
-この時、&amp;h とすることに注意（FsaClose(&amp;h)も同様）。<br/>
-FsaOpen()の戻り値が 0 なら、オープン成功。<br/>
-</li>
-<li>ストリームに処理を実行します。<br/>
-FsaWriteStream(h,i,buff,from,bytes) や FsaReadStream (h,i,buff,from,bytes) 等でストリームにI/O処理等を実行します。
-</li>
-<li>FSAファイルをクローズします。<br/>
-FsaClose(&amp;h);</li>
-</ol>
+<table width="100%">
+<col width="30%">
+<col width="35%">
+<col width="35%">
+<tr><th>標準 C 関数での読み書き手順</th><th>FSA 関数での読み書き手順</th><th>説明</th></tr>
+<tr><td>
+#include &lt;stdio.h&gt;<br/>
+#include &lt;fcntl.h&gt;<br/>
+#include &lt;unistd.h&gt;<br/>
+<br/>
+int fd;<br/>
+fd=open(pathname,openmode);<br/>
+read(fd,buf,count);<br/>
+write(fd,buf,count);<br/>
+close(fd);<br/>
+</td><td>
+/* fsa.h must be included before using FSA API */<br/>
+#include "fsa.h" <br/>
+<br/>
+FSA_HANDLE h;<br/>
+FsaOpen(&amp;h,pathname, openmode);<br/>
+FsaReadStream(h,<b><u>i</u></b>,buf,<b>from</b>,count);<br/>
+FsaWriteStream(h,<b><u>i</u></b>,buf,<b>from</b>,count);<br/>
+FsaClose(&amp;h);<br/>
+</td><td>
+標準 C ライブラリィも FSA も最初に対象ファイルをオープンして処理後にクローズするのは同じです。<br/>
+標準 C の write() に FSA では FsaWriteStream()、
+標準 C の read() に FSA では FsaReadStream() が対応します。<br/>
+FSA では seek() が無いので、引数に処理開始バイト位置の from を指定する必要があります。<br/>
+<br/>
+最大の違いは FsaReadStream() と FsaWriteStream() では<b>ストリームのインデックス i を指定している</b>ことです。<br/>
+FSA では 同じファイルに読み書きを実行しても、 i が異なれば全く独立した互いに異なる処理と見なされます。従って、各 i 毎にサイズ（ストリームサイズ）が存在します。
+</td></tr>
+<table>
+
 
 <a name="API"/>
 <h2>関数一覧</h2>
@@ -93,7 +110,8 @@ FsaClose(&amp;h);</li>
 ※データや情報は全て関数の引数でやり取りします。<br/>
 ※すべてのストリームの初期サイズはゼロです。<br/>
 ※FSAで提供されるライブラリー関数は全て Fsa という接頭語で開始します。<br/>
-
+※関数を呼び出す前に #include "fsa.h" をプログラムの先頭で記述する必要があります。
+<p/>
 <h3>主要関数</h3>
 <table width="100%">
 <col width="40%"><col width="60%">
@@ -114,8 +132,9 @@ FsaClose(&amp;h);</li>
 </td></tr>
 <tr><td>FsaWriteStream(FSA_HANDLE h, U_INT i, void* buff,U_LONG from, U_INT bytes)</td><td>ストリームにデータを書き込みます。
 <ul>
-<li><b>FSA_HANDLE *h</b><br/>オープンされているFSAファイルハンドル。</li>
-<li><b>U_INT i</b><br/>書き込み対象のストリーム番号（0-n:注１）。</li>
+<li><b>FSA_HANDLE h</b><br/>オープンされているFSAファイルハンドル。</li>
+<li><b>U_INT i</b><br/>書き込み対象のストリーム番号（0-n:注１）。<br/>
+(0 &lt;= from  &lt;= stream i の現サイズ)</li>
 <li><b>void* buff</b><br/>書き込みデータ領域のアドレス。</li>
 <li><b>U_LONG from</b><br/>ストリーム(i)上の書き込み開始バイト位置。</li>
 <li><b>U_INT bytes</b><br/>ストリーム(i)上に書き込むバイト数。</li>
@@ -124,10 +143,12 @@ FsaClose(&amp;h);</li>
 <tr><td>FsaReadStream (FSA_HANDLE h, U_INT i, void* buff,U_LONG from, U_INT bytes)</td><td>
 ストリームからデータを読み込みます。
 <ul>
-<li><b>FSA_HANDLE *h</b><br/>オープンされているFSAファイルハンドル。</li>
+<li><b>FSA_HANDLE h</b><br/>オープンされているFSAファイルハンドル。</li>
 <li><b>U_INT i</b><br/>読み込み対象のストリーム番号（0-n:注１）。</li>
 <li><b>void* buff</b><br/>読み込み用データ領域のアドレス。</li>
-<li><b>U_LONG from</b><br/>ストリーム(i)上の読み込み開始バイト位置。</li>
+<li><b>U_LONG from</b><br/>ストリーム(i)上の読み込み開始バイト位置。<br/>
+(from + bytes &lt;= stream i の現サイズ)</li>
+</li>
 <li><b>U_INT bytes</b><br/>ストリーム(i)上の読み込みバイト数。</li>
 </ul>
 
@@ -135,7 +156,7 @@ FsaClose(&amp;h);</li>
 <tr><td>FsaClose(FSA_HANDLE* h)</td><td>FSAファイルをクローズして処理を終了します。エラーが検出されても<a href="#ERROR_HANDLER">エラーハンドラー</a>は呼ばれません。</td></tr>
 </table>
 注１：<blockquote>
-n は FsaGetMaxStreamCount(h,&amp;m) で取得できます（n=m-1）。また、m は FsaExtendMaxStreamCount(h,m) で自由に拡大できます。
+n は FsaGetMaxStreamCount(h,&amp;m) で取得できます（n=m-1）。また、m は FsaExtendMaxStreamCount(h,M) で自由に拡大できます（最低でも M 個ストリーム数を増やします）。
 </blockquote>
 
 
@@ -196,10 +217,11 @@ int ErrorFunc(
 具体的なプログラミングについては付属の簡単なサンプルプログラム tans.c を参考にしてください。<br/>
 tans は任意の複数ファイルを一つの FSA ファイルの指定されたインデックス番号位置に格納、そして、
 取り出すことが出来ます。<br/>
-コマンドラインは tans &lt;open mode&gt; &lt;FSA(tans) file&gt; という形で実行します。<br/>
-ここで&lt;open mode&gt;は<a href="#API">FsaOpen()</a>で指定可能なオープンモード文字（1文字）。
-&lt;FSA(tans) file&gt;はオープン対象の FSA ファイル名（パス）です。
-プログラムが起動したら '?' でヘルプメッセージを表示させれば処理内容が分かります。
+コマンドラインは <b>tans &lt;open mode&gt; &lt;FSA(TANS) file&gt;</b> という形で実行します。<br/>
+ここで<b>&lt;open mode&gt;</b>は<a href="#API">FsaOpen()</a>で指定可能なオープンモード文字（1文字）。
+<b>&lt;FSA(TANS) file&gt;</b>はオープン対象の FSA ファイル名（パス）です。<br/>
+プログラムが起動したら <b>'?'</b> でヘルプメッセージを表示させれば処理内容が分かります。
+<hr/>
 <div align="right">
 小林 茂雄（shigeo@tinyforest.jp） 2023-2-10
 </div>

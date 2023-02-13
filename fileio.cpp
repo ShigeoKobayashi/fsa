@@ -67,7 +67,7 @@ void CFileIo::FIoOpen(const char *szPath,char chMode)
 	if(chMode=='T' || chMode=='t') {
 		// truncation mode
 		pszMode = "w+b";
-		chMode = 'N'; 
+		chMode = 'T'; 
 	} else if(chMode=='N' || chMode=='n') {
 		// New File 
 		CHECK(FIoExist(szPath),ERROR_FILE_OPEN_MODE,"FIoOpen(): Existing file for 'N'");
