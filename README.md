@@ -12,5 +12,5 @@ This software can be redistributed under GNU Lesser General Public License.
 
 To build this software on Linux => see makefile    
 To build this software on Windows => create Visual studio solution,and add source files.  
-To use this library => include fsa.h.h in your source codes(see tans.c) and link appropriate library files.
+To use this library => include fsa.h in your source codes(see tans.c) and link appropriate library files.
 This software has been tested on Windows-10(32-bit & 64-bit) and Linux(32-bit CentOS-5 & 64-bit CentOS-7). 
