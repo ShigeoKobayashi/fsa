@@ -8,8 +8,6 @@
 #ifndef __INC_ERROR__
 #define  __INC_ERROR__
 
-#include "stdafx.h"
-
 #define ER_THROW(h,e,s) throw CErrException(h,e,s,__FILE__,__LINE__)
 #define CHECK(f,e,s) if(!(f)) ER_THROW((void *)this,e,s);
 

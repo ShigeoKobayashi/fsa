@@ -32,10 +32,11 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "fsa.h"
 #include "error.h"
-
 #include "debug.h"
+
+#include "fsa.h"
+
 #include "blockio.h"
 #include "fileio.h"
 #include "header.h"
@@ -90,3 +91,5 @@
   */
   #define EXPORT(t) __attribute__((visibility ("default")))  t
 #endif /**** LINUX ****/
+
+

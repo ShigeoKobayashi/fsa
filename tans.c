@@ -215,6 +215,7 @@ int main(int argc, char* argv[])
 
 	memcpy(&gTansId,gId,sizeof(gTansId));
 
+	if (argc <= 1) {printf("Error: argument insufficient!\n");return 0;}
 	if (argc == 2 || (argv[1])[0] == '?') {
 		Help();
 		return 0;

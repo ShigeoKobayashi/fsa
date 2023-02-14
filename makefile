@@ -3,8 +3,9 @@ HEADERS=stream.h blockio.h debug.h error.h fileio.h fsa.h directory.h header.h m
 TEST_SOURCES=tans.c
 
 lib:
-	g++ -o fsa.so -shared -fPIC -fvisibility=hidden $(DLL_SOURCES)
+	g++ -std=c++1y -o libfsa.so -shared -fPIC -fvisibility=hidden $(DLL_SOURCES)
 link:
 	gcc -L./ -o tans tans.c -lfsa
+#  make run ARGS='r tans.db'
 run:
-	LD_LIBRARY_PATH=. ./tans
+	LD_LIBRARY_PATH=. ./tans ${ARGS}
