@@ -1,8 +1,8 @@
 //
 //****************************************************************************
 //*                                                                          *
-//* @Copyright (C) Shigeo Kobayashi, 2022.									 *
-//*                 All rights reserved.									 *
+//*           Copyright (C) Shigeo Kobayashi, 2022.	                         *
+//*                        All rights reserved.					                     *
 //*                                                                          *
 //****************************************************************************
 //
@@ -11,5 +11,5 @@
 #include "sat.h"
 
 /*
- *  No code here ==> see directory.h
+ *  No code here ==> see sat.h
  */
