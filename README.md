@@ -1,5 +1,5 @@
 # FSA
-[File of Stream Array,C/C++ libraly](http://www.tinyforest.jp/oss/fsa_en.h)
+[File of Stream Array,C/C++ libraly](http://www.tinyforest.jp/oss/fsa_en.html)
 
 The C/C++ standard functions open()/read()/write()/close() can read and write any file opened in a single stream image.
 FSA offers simillar functions with much flexible I/O capabilities(stream array).
