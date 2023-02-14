@@ -58,7 +58,7 @@ int Remove(char* path)
 	struct stat statBuf;
 	if (stat(path, &statBuf) == 0) {
 		char ch;
-		printf("File %s to be opened with 'T' mode exists, OK to truncate (y|n)",path);
+		printf("Existing target file %s is destroyed, OK ? (y|n) ",path);
 		do {
 			printf("?");
 			ch = toupper(getchar());
@@ -148,17 +148,21 @@ void Write(char *pcmd)
 	if (ix < 0) return;
 	FsaGetStreamSize(gh, ix, &size);
 	if (size <= 0) {printf("Error: Index %d is empty\n)", ix); return;}
-	FsaReadStream(gh, ix, gBuffer, 0, (size>1024)?1024: (U_INT)size);
 	if (!(pfile[0])) {
-		if (!Remove(gBuffer)) return;
-		fp = fopen(gBuffer, "wb");
-		if (!fp) { printf("Error: File %s can not be opened.\n", gBuffer); return; }
+		/* Targetfile name not given ==> use stored name */
+		char  wFile[1025]; /* File name length 1024,may be OK. */
+		FsaReadStream(gh, ix, wFile, 0, (size > 1024) ? 1024 : (U_INT)size);
+		if (!Remove(wFile)) return;
+		fp = fopen(wFile, "wb");
+		if (!fp) { printf("Error: File %s can not be opened.\n", wFile); return; }
 	}
 	else {
 		if (!Remove(pfile)) return;
 		fp = fopen(pfile, "wb");
 		if (!fp) { printf("Error: File %s can not be opened.\n", pfile); return; }
 	}
+	/* skip name field */
+	FsaReadStream(gh, ix, gBuffer, 0, (size > 1024) ? 1024 : (U_INT)size);
 	nc = strlen(gBuffer);
 	FsaGetStreamSize(gh, ix, &size);
 	from  = (U_LONG)nc + 1;
@@ -215,7 +219,6 @@ int main(int argc, char* argv[])
 
 	memcpy(&gTansId,gId,sizeof(gTansId));
 
-	if (argc <= 1) {printf("Error: argument insufficient!\n");return 0;}
 	if (argc == 2 || (argv[1])[0] == '?') {
 		Help();
 		return 0;
