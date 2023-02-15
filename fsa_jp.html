@@ -97,8 +97,14 @@ FSA では seek() が無いので、引数に処理開始バイト位置の from
 FSA では 同じファイルに読み書きを実行しても、 i が異なれば全く独立した互いに異なる処理と見なされます。従って、各 i 毎にサイズ（ストリームサイズ）が存在します。
 </td></tr>
 <table>
-
-
+<p/>
+<table width="100%">
+<col width="50%">
+<col width="50%">
+<tr><th>標準 C の I/O</th><th>FSA の I/O</th></tr>
+<tr><td><img src="./c.gif" width="100%"></td><td><img src="./fsa.gif" width="100%"></td><tr>
+</table>
+<p/><br/>
 <a name="API"/>
 <h2>関数一覧</h2>
 全ての関数の戻り値は整数です。<br/>

@@ -93,6 +93,14 @@ In FSA,you need to specify starting byte position '<b>from</b>' for I/O processi
 Note the important difference that,in FsaReadStream() and FsaWriteStream(),one more argument <b>i which is the index of the target stream</b> is specified.<br/> In FSA,I/O with different index i is completely independent and different. Also note that any stream identified by index i has its own stream size.
 </td></tr>
 <table>
+<p/><br/>
+<table width="100%">
+<col width="50%">
+<col width="50%">
+<tr><th>Standard C I/O</th><th>FSA I/O</th></tr>
+<tr><td><img src="./c.gif" width="100%"></td><td><img src="./fsa.gif" width="100%"></td><tr>
+</table>
+<p/><br/>
 
 <a name="API"/>
 <h2>API references</h2>
@@ -211,7 +219,7 @@ int ErrorFunc(
 </code></pre>
 
 <a name="SAMPLE"/>
-<h2>Sample program (tans.c)</h2>
+<h2>Sanple program (tans.c)</h2>
 For actual programming,see the sample program tans.c(The FSA file, tans.c opens is called TANS file).<br/>
 Using tans.c,you can store any file to TANS file(to any stream),and withdraw any file(stream) from TANS file.<br/>
 To invoke,command line will be: <b>tans &lt;open mode&gt; &lt;FSA(TANS) file&gt;</b><br/>
